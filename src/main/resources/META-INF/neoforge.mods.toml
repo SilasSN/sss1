@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+[[mods]]
+modId="townfolk"
+version="0.1.0"
+displayName="Townfolk: Working Villagers"
+authors="Personal-use prototype"
+description='''A town hall and four working villagers. Workers remove real blocks in the loaded Minecraft world and deposit real loot in the town hall chest.'''
+[[dependencies.townfolk]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.115,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.townfolk]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+ordering="NONE"
+side="BOTH"

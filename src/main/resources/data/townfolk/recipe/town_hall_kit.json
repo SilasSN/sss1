@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["PPP", "PBP", "PEP"],
+  "key": {
+    "P": "minecraft:oak_planks",
+    "B": "minecraft:bell",
+    "E": "minecraft:emerald"
+  },
+  "result": { "id": "townfolk:town_hall_kit", "count": 1 }
+}
