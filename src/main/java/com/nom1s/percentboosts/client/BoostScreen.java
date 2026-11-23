@@ -49,7 +49,7 @@ public final class BoostScreen extends Screen {
     }
 
     public static void open(ItemStack applier, boolean forItem) {
-        Minecraft.getInstance().setScreen(new BoostScreen(applier, forItem, 0));
+        Minecraft.getInstance().gui.setScreen(new BoostScreen(applier, forItem, 0));
     }
 
     private int amount() {
@@ -97,7 +97,7 @@ public final class BoostScreen extends Screen {
     }
 
     private void navigate(int targetPage) {
-        Minecraft.getInstance().setScreen(new BoostScreen(openedApplier, forItem, targetPage));
+        Minecraft.getInstance().gui.setScreen(new BoostScreen(openedApplier, forItem, targetPage));
     }
 
     @Override

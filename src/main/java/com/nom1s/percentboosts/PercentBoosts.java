@@ -6,7 +6,7 @@ import com.nom1s.percentboosts.component.ModComponents;
 import com.nom1s.percentboosts.event.GameplayEvents;
 import com.nom1s.percentboosts.item.ModItems;
 import com.nom1s.percentboosts.network.ApplyBoostPacket;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -37,7 +37,7 @@ public final class PercentBoosts {
     }
 
     private void registerAttributes(EntityAttributeModificationEvent event) {
-        ModAttributes.ALL.forEach(attr -> event.add(EntityType.PLAYER, attr));
+        ModAttributes.ALL.forEach(attr -> event.add(EntityTypes.PLAYER, attr));
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {

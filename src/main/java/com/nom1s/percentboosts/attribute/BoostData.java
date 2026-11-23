@@ -25,7 +25,7 @@ public final class BoostData {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
         DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, PercentBoosts.MOD_ID);
     public static final Supplier<AttachmentType<Map<String, Integer>>> BOOSTS = ATTACHMENTS.register(
-        "player_boosts", () -> AttachmentType.<Map<String, Integer>>builder(HashMap::new)
+        "player_boosts", () -> AttachmentType.<Map<String, Integer>>builder((Supplier<Map<String, Integer>>) HashMap::new)
             .serialize(Codec.unboundedMap(Codec.STRING, Codec.INT).fieldOf("values"))
             .copyOnDeath().build());
 

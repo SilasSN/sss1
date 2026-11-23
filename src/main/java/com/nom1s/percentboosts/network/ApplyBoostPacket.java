@@ -70,7 +70,7 @@ public record ApplyBoostPacket(String key, int amount, boolean reset, boolean fo
     }
 
     private static void message(ServerPlayer player, String s) {
-        player.displayClientMessage(Component.literal(s), true);
+        player.sendOverlayMessage(Component.literal(s));
     }
 
     private static ItemStack findApplier(ServerPlayer player) {

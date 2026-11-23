@@ -7,11 +7,13 @@ import com.nom1s.percentboosts.logic.DropMath;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -50,7 +52,9 @@ public final class GameplayEvents {
         else if (strength >= 60) pct += 5 + rng.nextInt(13);
         else if (strength >= 30) pct += rng.nextInt(8);
         pct = Math.max(1, Math.min(100, pct));
-        mob.spawnAtLocation(PercentageItem.create(pct));
+        if (mob.level() instanceof ServerLevel serverLevel) {
+            mob.spawnAtLocation(serverLevel, PercentageItem.create(pct));
+        }
     }
 
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -79,12 +83,12 @@ public final class GameplayEvents {
             if (attacker.getRandom().nextDouble() < chance)
                 event.setNewDamage((float) (event.getNewDamage() * crit));
         }
-        if (event.getEntity().getType().is(EntityTypeTags.UNDEAD))
+        if (event.getEntity().typeHolder().is(EntityTypeTags.UNDEAD))
             event.setNewDamage((float) (event.getNewDamage() * attribute(attacker, ModAttributes.DAMAGE_UNDEAD)));
         LivingEntity target = event.getEntity();
         EntityType<?> type = target.getType();
-        if (target.getMaxHealth() >= 100 || type == EntityType.ENDER_DRAGON || type == EntityType.WITHER
-            || type == EntityType.WARDEN || type == EntityType.ELDER_GUARDIAN)
+        if (target.getMaxHealth() >= 100 || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WITHER
+            || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN)
             event.setNewDamage((float) (event.getNewDamage() * attribute(attacker, ModAttributes.DAMAGE_BOSSES)));
     }
 
@@ -108,12 +112,12 @@ public final class GameplayEvents {
     }
 
     public static void onAnvil(AnvilUpdateEvent event) {
-        if (event.getPlayer() == null || event.getCost() <= 0) return;
+        if (event.getPlayer() == null || event.getXpCost() <= 0) return;
         Player player = event.getPlayer();
         boolean repair = !event.getLeft().isEmpty() && !event.getRight().isEmpty()
             && event.getLeft().isDamageableItem()
             && net.minecraft.world.item.ItemStack.isSameItem(event.getLeft(), event.getRight());
         double factor = attribute(player, repair ? ModAttributes.REPAIR_COST : ModAttributes.ENCHANT_COST);
-        if (factor != 1) event.setCost(Math.max(1L, Math.round(event.getCost() * factor)));
+        if (factor != 1) event.setXpCost((int) Math.max(1L, Math.min(Integer.MAX_VALUE, Math.round(event.getXpCost() * factor))));
     }
 }

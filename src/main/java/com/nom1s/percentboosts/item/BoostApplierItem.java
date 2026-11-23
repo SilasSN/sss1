@@ -34,7 +34,7 @@ public class BoostApplierItem extends Item {
                 int points = PercentageItem.value(other);
                 setBalance(applier, Math.min(1_000_000, balance(applier) + points));
                 if (!player.getAbilities().instabuild) other.shrink(1);
-                player.displayClientMessage(Component.literal("Absorbed " + points + "%. Balance: " + balance(applier)), true);
+                player.sendOverlayMessage(Component.literal("Absorbed " + points + "%. Balance: " + balance(applier)));
             }
             return InteractionResult.SUCCESS;
         }
