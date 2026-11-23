@@ -336,7 +336,7 @@ public final class WorkerAi {
             }
         }
         if (logs.size() < 3 || !hasCanopy(level, logs)) return null;
-        logs.sort(Comparator.comparingInt(BlockPos::getY)
+        logs.sort(Comparator.<BlockPos>comparingInt(p -> p.getY())
                 .thenComparingInt(p -> Math.abs(p.getX()-root.getX()) + Math.abs(p.getZ()-root.getZ())));
         return new TreeJob(root.immutable(), stand.immutable(), logs, block);
     }
