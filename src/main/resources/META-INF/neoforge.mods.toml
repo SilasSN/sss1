@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="percentboosts"
+version="1.0.0-26.3-personal"
+displayName="PercentBoosts (personal reconstruction)"
+authors="Original author: Nom1s"
+description='''Personal-use reconstruction based on the uploaded PercentBoosts English JAR. Not yet build/game tested on 26.3.'''
+
+[[dependencies.percentboosts]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.115,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.percentboosts]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+ordering="NONE"
+side="BOTH"
