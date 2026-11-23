@@ -164,6 +164,31 @@ public final class TownStorage {
         }
     }
 
+    /** Check supplies without consuming them (farm planning uses this on the server thread). */
+    public static boolean hasItem(ServerLevel world, BlockPos home, Item wanted) {
+        for (Container store : containers(world, home)) {
+            for (int slot = 0; slot < store.getContainerSize(); slot++) {
+                if (store.getItem(slot).is(wanted)) return true;
+            }
+        }
+        return false;
+    }
+
+    /** Consume exactly one item from real physical warehouse inventories (for sapling replanting). */
+    public static boolean consumeItem(ServerLevel world, BlockPos home, Item wanted) {
+        for (Container store : containers(world, home)) {
+            for (int slot = 0; slot < store.getContainerSize(); slot++) {
+                ItemStack stack = store.getItem(slot);
+                if (!stack.is(wanted)) continue;
+                stack.shrink(1);
+                if (stack.isEmpty()) store.setItem(slot, ItemStack.EMPTY);
+                store.setChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean consumeFood(ServerLevel world, BlockPos home) {
         for (Container store : containers(world, home)) {
             for (int slot = 0; slot < store.getContainerSize(); slot++) {

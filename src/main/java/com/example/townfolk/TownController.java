@@ -53,6 +53,9 @@ public final class TownController {
                 .then(Commands.literal("storage").executes(c -> withHall(c, "storage", null)))
                 .then(Commands.literal("storageupgrade").executes(c -> withHall(c, "storageupgrade", null)))
                 .then(Commands.literal("workers").executes(c -> withHall(c, "workers", null)))
+                .then(Commands.literal("production").executes(c -> withHall(c, "production", null)))
+                .then(Commands.literal("farm").executes(c -> withHall(c, "farm", null)))
+                .then(Commands.literal("rescue").executes(c -> withHall(c, "rescue", null)))
                 .then(Commands.literal("hallupgrade").executes(c -> withHall(c, "hallupgrade", null)));
         for (String role : TownManager.ROLES) {
             root.then(Commands.literal("hire")
@@ -75,6 +78,8 @@ public final class TownController {
             if (action == null) { display(player, home); return 1; }
             if (action.equals("workers")) { workers(player, home); return 1; }
             if (action.equals("food")) { food(player, home); return 1; }
+            if (action.equals("production")) { production(player, home); return 1; }
+            if (action.equals("farm")) { farm(player, home); return 1; }
             if (action.equals("storage")) { storage(player, home); return 1; }
             if (!TownManager.isOwner(world, home, player)) {
                 say(player, "Only the Town Hall founder may hire or upgrade workers.");
@@ -85,6 +90,7 @@ public final class TownController {
                 case "storageupgrade" -> storageUpgrade(player, home);
                 case "hire" -> hire(player, home, role);
                 case "upgrade" -> upgrade(player, home, role);
+                case "rescue" -> rescue(player, home);
                 default -> 0;
             };
         } catch (Exception exception) {
@@ -121,6 +127,9 @@ public final class TownController {
             say(player, "You can view this town, but only its owner can manage it.");
         }
         button(player, "View workers", "/townfolk workers");
+        button(player, "View production", "/townfolk production");
+        button(player, "View farm", "/townfolk farm");
+        if (TownManager.isOwner(level, home, player)) button(player, "Rescue stuck workers", "/townfolk rescue");
         button(player, "View food", "/townfolk food");
         button(player, "View warehouse", "/townfolk storage");
     }
@@ -133,9 +142,65 @@ public final class TownController {
             CompoundTag tag = v.getPersistentData();
             say(player, " - " + tag.getStringOr("townfolk_role", "worker") + " lv."
                     + tag.getIntOr("tf_worker_level", 1)
-                    + " | food: " + tag.getIntOr("tf_food", 100) + "/100");
+                    + " | food: " + tag.getIntOr("tf_food", 100) + "/100"
+                    + " | blocks: " + (tag.getIntOr("tf_stat_wood_blocks", 0)
+                    + tag.getIntOr("tf_stat_mined_blocks", 0)
+                    + tag.getIntOr("tf_stat_harvested_blocks", 0))
+                    + " | stored items: " + tag.getIntOr("tf_stat_deposited_items", 0)
+                    + " | rescued: " + tag.getIntOr("tf_stat_rescues", 0));
         }
         say(player, "For individual upgrades, stand near the desired worker of its role.");
+    }
+
+    private static void farm(ServerPlayer player, BlockPos home) {
+        ServerLevel world = player.level();
+        say(player, "Each farmer claims their own 5x5 farm on flat existing soil.");
+        int farmers = 0;
+        for (Villager v : TownManager.loadedWorkers(world, home)) {
+            if (!v.getPersistentData().getStringOr("townfolk_role", "").equals("farmer")) continue;
+            farmers++;
+            BlockPos field = TownFarm.locate(world, home, v);
+            if (field == null) {
+                say(player, "Farmer needs a clear 5x5 flat dirt/grass patch outside the hall.");
+                continue;
+            }
+            say(player, "Farm #" + farmers + ": x=" + field.getX() + " y="
+                    + field.getY() + " z=" + field.getZ());
+            if (!world.getBlockState(field).is(Blocks.WATER)) {
+                say(player, "   Water pending: supply a WATER BUCKET in the Town Hall warehouse.");
+            }
+        }
+        if (farmers == 0) say(player, "No loaded farmers. Hire a farmer to start a new plot.");
+        say(player, "Supply WHEAT SEEDS, CARROTS, POTATOES or BEETROOT SEEDS in the warehouse.");
+        var stats = TownManager.data(world, home);
+        say(player, "Plots tilled: " + stats.getIntOr("tf_stat_farm_tilled", 0)
+                + " | seeds planted: " + stats.getIntOr("tf_stat_farm_planted", 0)
+                + " | water sources added: " + stats.getIntOr("tf_stat_farm_water_sources", 0));
+        say(player, "Crops grow naturally; harvested items are deposited in town storage.");
+    }
+
+    private static void production(ServerPlayer player, BlockPos home) {
+        CompoundTag stats = TownManager.data(player.level(), home);
+        say(player, "=== Town production (since installation of 0.4) ===");
+        say(player, "Wood logs felled: " + stats.getIntOr("tf_stat_wood_blocks", 0)
+                + " | Whole trees: " + stats.getIntOr("tf_stat_trees_felled", 0));
+        say(player, "Blocks mined: " + stats.getIntOr("tf_stat_mined_blocks", 0)
+                + " | Crops harvested: " + stats.getIntOr("tf_stat_harvested_blocks", 0));
+        say(player, "Actual items stored: " + stats.getIntOr("tf_stat_deposited_items", 0)
+                + " | Items dropped from full storage: " + stats.getIntOr("tf_stat_overflow_items", 0));
+        say(player, "Stuck returns: " + stats.getIntOr("tf_stat_stuck_returns", 0)
+                + " | Emergency rescues: " + stats.getIntOr("tf_stat_rescues", 0));
+        say(player, "Mining output goes directly into the Town Hall chest and barrels.");
+    }
+
+    private static int rescue(ServerPlayer player, BlockPos home) {
+        int count = 0;
+        for (Villager worker : TownManager.loadedWorkers(player.level(), home)) {
+            if (WorkerAi.rescueWorker(player.level(), worker, home)) count++;
+        }
+        say(player, "Returned " + count + " loaded worker(s) to a safe Town Hall spot.");
+        if (count == 0) say(player, "No safe destination was found or the workers were unloaded.");
+        return count;
     }
 
     private static void food(ServerPlayer player, BlockPos home) {
@@ -257,6 +322,7 @@ public final class TownController {
         if (!(villager.level() instanceof ServerLevel world)) return;
         CompoundTag tag = villager.getPersistentData();
         if (!TownManager.validRole(tag.getStringOr("townfolk_role", ""))) return;
+        WorkerAi.forget(villager);
         BlockPos home = new BlockPos(tag.getIntOr("townfolk_x", 0),
                 tag.getIntOr("townfolk_y", 0), tag.getIntOr("townfolk_z", 0));
         if (TownManager.isHall(world, home)) {
