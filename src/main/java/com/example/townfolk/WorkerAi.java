@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -90,7 +91,7 @@ public final class WorkerAi {
         if (closest != null) {
             villager.getNavigation().moveTo(closest, 1.25);
             if (best < 7.0) {
-                villager.swing(InteractionHand.MAIN_HAND);
+                villager.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT);
                 // Guards attack only hostile Monster entities, not animals, villagers or players.
                 float damage = 4.0f + 0.65f * (workerLevel - 1);
                 if (hunger <= 0) damage *= 0.5f;
@@ -258,6 +259,6 @@ public final class WorkerAi {
             TownStorage.insert(level, home, stack); // all upgraded storage inventories
             if (!stack.isEmpty()) Block.popResource(level, pos, stack); // overflow never disappears
         }
-        worker.swing(InteractionHand.MAIN_HAND);
+        worker.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT);
     }
 }

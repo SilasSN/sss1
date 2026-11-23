@@ -32,7 +32,7 @@ public final class TownHallKitItem extends Item {
 
         BlockPos home = context.getClickedPos().above();
         if (!canBuild(level, home)) {
-            player.displayClientMessage(Component.literal("Town Hall needs a clear 9x9 area, 5 blocks tall."), true);
+            player.sendOverlayMessage(Component.literal("Town Hall needs a clear 9x9 area, 5 blocks tall."));
             return InteractionResult.FAIL;
         }
         build(level, home);
@@ -41,7 +41,7 @@ public final class TownHallKitItem extends Item {
             TownManager.spawn(level, home, role);
         }
         if (!player.getAbilities().instabuild) context.getItemInHand().shrink(1);
-        player.displayClientMessage(Component.literal("Town Hall founded! Lumberjack, Miner, Farmer and Guard hired."), false);
+        player.sendSystemMessage(Component.literal("Town Hall founded! Lumberjack, Miner, Farmer and Guard hired."));
         return InteractionResult.SUCCESS_SERVER;
     }
 
