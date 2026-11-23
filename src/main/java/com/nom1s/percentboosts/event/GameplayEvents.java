@@ -77,6 +77,15 @@ public final class GameplayEvents {
 
     public static void onDamage(LivingDamageEvent.Pre event) {
         if (!(event.getSource().getEntity() instanceof Player attacker) || attacker.level().isClientSide()) return;
+        // Since Minecraft 26.3 no longer exposes AbstractArrow.getBaseDamage(),
+        // apply the owner's arrow damage multiplier at the actual damage event.
+        // This preserves vanilla arrow damage, bow enchantments and critical hits.
+        if (event.getSource().getDirectEntity() instanceof AbstractArrow) {
+            double projectileDamage = attribute(attacker, ModAttributes.PROJECTILE_DAMAGE);
+            if (projectileDamage != 1) {
+                event.setNewDamage((float) (event.getNewDamage() * projectileDamage));
+            }
+        }
         double crit = attribute(attacker, ModAttributes.CRIT_DAMAGE);
         if (crit > 1.5) {
             double chance = Math.min(.8, .25 + (crit - 1.5) * .4);
@@ -105,10 +114,6 @@ public final class GameplayEvents {
             || !(projectile.getOwner() instanceof Player player)) return;
         double speed = attribute(player, ModAttributes.PROJECTILE_SPEED);
         if (speed != 1) entity.setDeltaMovement(entity.getDeltaMovement().scale(speed));
-        if (entity instanceof AbstractArrow arrow) {
-            double damage = attribute(player, ModAttributes.PROJECTILE_DAMAGE);
-            if (damage != 1) arrow.setBaseDamage(arrow.getBaseDamage() * damage);
-        }
     }
 
     public static void onAnvil(AnvilUpdateEvent event) {
